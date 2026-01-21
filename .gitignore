@@ -1,0 +1,403 @@
+# ==========================================
+# DHAHARAN.ID BACKEND - .GITIGNORE
+# ==========================================
+
+# ==========================================
+# PYTHON
+# ==========================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.local
+.env.*.local
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ==========================================
+# DJANGO
+# ==========================================
+# Django secret key
+*.secret
+
+# Media files (uploads)
+/media/
+media/
+
+# Static files (collected)
+/staticfiles/
+/static/
+staticfiles/
+static/
+
+# Django migrations (optional - uncomment if needed)
+# */migrations/*.py
+# */migrations/*.pyc
+# !*/migrations/__init__.py
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Django logs
+*.log
+
+# ==========================================
+# DATABASE
+# ==========================================
+# PostgreSQL
+*.pgsql
+*.sql
+*.dump
+
+# Database backup files
+*.backup
+*.bak
+
+# ==========================================
+# IDE / EDITORS
+# ==========================================
+# Visual Studio Code
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm
+.idea/
+.idea/*
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Atom
+.atom/
+
+# ==========================================
+# OPERATING SYSTEM
+# ==========================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+Icon
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# ==========================================
+# LOGS & TEMP FILES
+# ==========================================
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.swp
+*~.nib
+local_settings.py
+
+# ==========================================
+# SECURITY & CREDENTIALS
+# ==========================================
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+*.env
+
+# Secret keys
+secret.txt
+secrets.json
+credentials.json
+service-account.json
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa
+id_rsa.pub
+id_dsa
+id_dsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+
+# ==========================================
+# TESTING
+# ==========================================
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.hypothesis/
+*.cover
+.cache/
+
+# ==========================================
+# DOCUMENTATION
+# ==========================================
+docs/_build/
+site/
+
+# ==========================================
+# MISCELLANEOUS
+# ==========================================
+# Compressed files
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Backups
+*.backup
+*.old
+
+# Node modules (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+*.dmg
+*.pkg
+*.deb
+*.rpm
+
+# ==========================================
+# PROJECT SPECIFIC
+# ==========================================
+# Local configuration overrides
+local_settings.py
+settings_local.py
+
+# Development database
+dev.db
+development.db
+
+# Test database
+test.db
+test_*.db
+
+# Celery beat schedule
+celerybeat-schedule.db
+
+# Webpack stats
+webpack-stats.json
+
+# Redis dump
+dump.rdb
+
+# ==========================================
+# KEEP THESE FILES
+# ==========================================
+# Keep .env.example for reference
+!.env.example
+
+# Keep __init__.py files
+!__init__.py
+!*/migrations/__init__.py
+
+# Keep gitkeep files
+!.gitkeep
+
+# ==========================================
+# END OF .GITIGNORE
+# ==========================================
