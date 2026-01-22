@@ -197,6 +197,7 @@ class ResepViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return ResepListSerializer
+        # For retrieve, create, update, partial_update use full serializer
         return ResepSerializer
     
     @action(detail=False, methods=['get'])
@@ -235,6 +236,47 @@ class NutrisiResepViewSet(viewsets.ModelViewSet):
 class FotoResepViewSet(viewsets.ModelViewSet):
     queryset = FotoResep.objects.all()
     serializer_class = FotoResepSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to delete file from S3 before deleting from database
+        """
+        instance = self.get_object()
+        
+        # Delete file from S3 if exists
+        if instance.file_path:
+            try:
+                # file_path is now a URL string, extract the S3 key
+                # URL format: https://s3.region.amazonaws.com/bucket/prefix/folder/file.jpg
+                # We need to delete using boto3
+                import boto3
+                from django.conf import settings
+                
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                
+                # Extract key from URL
+                # Example URL: https://s3.ap-southeast-1.amazonaws.com/bucket/dhaharan/resep/file.jpg
+                # Extract: dhaharan/resep/file.jpg
+                url_parts = instance.file_path.split('/')
+                # Find index of bucket name and get everything after it
+                bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+                bucket_index = url_parts.index(bucket_name)
+                s3_key = '/'.join(url_parts[bucket_index + 1:])
+                
+                s3_client.delete_object(Bucket=bucket_name, Key=s3_key)
+                print(f"Deleted file from S3: {s3_key}")
+            except Exception as e:
+                # Log error but continue with database deletion
+                print(f"Error deleting file from S3: {str(e)}")
+        
+        # Delete from database
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TipeTransaksiViewSet(viewsets.ModelViewSet):

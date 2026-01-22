@@ -166,12 +166,14 @@ class ResepSerializer(serializers.ModelSerializer):
 
 
 class ResepListSerializer(serializers.ModelSerializer):
+    foto = FotoResepSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Resep
         fields = [
             'id', 'judul', 'deskripsi', 'kategori', 'tingkat_kesulitan',
             'waktu_memasak', 'waktu_persiapan', 'porsi', 'kalori',
-            'created_at', 'updated_at'
+            'foto', 'created_at', 'updated_at'
         ]
 
 
