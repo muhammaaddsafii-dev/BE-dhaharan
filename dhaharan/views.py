@@ -34,11 +34,142 @@ class KegiatanViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return KegiatanListSerializer
         return KegiatanSerializer
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Override update to handle foto deletion before updating
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        # Check if there's a request to delete old photos
+        # This can be done by checking if new photos are being uploaded
+        # or if there's a specific flag in the request
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        
+        return Response(serializer.data)
+    
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+    
+    @action(detail=True, methods=['post'])
+    def delete_photos(self, request, pk=None):
+        """
+        Delete specific photos from kegiatan
+        Expects: {"photo_ids": [1, 2, 3]}
+        """
+        kegiatan = self.get_object()
+        photo_ids = request.data.get('photo_ids', [])
+        
+        if not photo_ids:
+            return Response(
+                {'error': 'photo_ids is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        deleted_count = 0
+        errors = []
+        
+        for photo_id in photo_ids:
+            try:
+                photo = FotoKegiatan.objects.get(id=photo_id, kegiatan=kegiatan)
+                
+                # Delete file from S3
+                if photo.file_path:
+                    try:
+                        storage = photo.file_path.storage
+                        if storage.exists(photo.file_path.name):
+                            storage.delete(photo.file_path.name)
+                    except Exception as e:
+                        errors.append(f"Error deleting file for photo {photo_id}: {str(e)}")
+                
+                # Delete from database
+                photo.delete()
+                deleted_count += 1
+                
+            except FotoKegiatan.DoesNotExist:
+                errors.append(f"Photo with id {photo_id} not found or doesn't belong to this kegiatan")
+        
+        response_data = {
+            'deleted_count': deleted_count,
+            'total_requested': len(photo_ids)
+        }
+        
+        if errors:
+            response_data['errors'] = errors
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'])
+    def replace_all_photos(self, request, pk=None):
+        """
+        Delete all existing photos and prepare for new uploads
+        This should be called BEFORE uploading new photos
+        """
+        kegiatan = self.get_object()
+        
+        # Get all photos for this kegiatan
+        photos = FotoKegiatan.objects.filter(kegiatan=kegiatan)
+        deleted_count = 0
+        errors = []
+        
+        for photo in photos:
+            try:
+                # Delete file from S3
+                if photo.file_path:
+                    try:
+                        storage = photo.file_path.storage
+                        if storage.exists(photo.file_path.name):
+                            storage.delete(photo.file_path.name)
+                    except Exception as e:
+                        errors.append(f"Error deleting file {photo.file_name}: {str(e)}")
+                
+                # Delete from database
+                photo.delete()
+                deleted_count += 1
+                
+            except Exception as e:
+                errors.append(f"Error deleting photo {photo.id}: {str(e)}")
+        
+        response_data = {
+            'message': f'Deleted {deleted_count} photos',
+            'deleted_count': deleted_count
+        }
+        
+        if errors:
+            response_data['errors'] = errors
+        
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class FotoKegiatanViewSet(viewsets.ModelViewSet):
     queryset = FotoKegiatan.objects.all()
     serializer_class = FotoKegiatanSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override destroy to delete file from S3 before deleting from database
+        """
+        instance = self.get_object()
+        
+        # Delete file from S3 if exists
+        if instance.file_path:
+            try:
+                # Get storage instance and delete from S3
+                storage = instance.file_path.storage
+                if storage.exists(instance.file_path.name):
+                    storage.delete(instance.file_path.name)
+            except Exception as e:
+                # Log error but continue with database deletion
+                print(f"Error deleting file from S3: {str(e)}")
+        
+        # Delete from database
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class VolunteerViewSet(viewsets.ModelViewSet):

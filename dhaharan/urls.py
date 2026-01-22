@@ -7,6 +7,7 @@ from .views import (
     NutrisiResepViewSet, FotoResepViewSet, TipeTransaksiViewSet,
     TransaksiViewSet, PengurusViewSet, FotoPengurusViewSet
 )
+from .upload_views import upload_to_s3
 
 router = DefaultRouter()
 router.register(r'jenis-kegiatan', JenisKegiatanViewSet, basename='jenis-kegiatan')
@@ -27,4 +28,5 @@ router.register(r'foto-pengurus', FotoPengurusViewSet, basename='foto-pengurus')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('upload/s3/', upload_to_s3, name='upload-s3'),
 ]

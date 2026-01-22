@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from django.contrib.gis.geos import GEOSGeometry
+import json
 from .models import (
     JenisKegiatan, StatusKegiatan, Kegiatan, FotoKegiatan, Volunteer,
     Resep, BahanResep, StepsResep, TipsResep, NutrisiResep, FotoResep,
@@ -29,34 +30,66 @@ class FotoKegiatanSerializer(serializers.ModelSerializer):
 
 
 # Kegiatan Serializers
-class KegiatanSerializer(GeoFeatureModelSerializer):
+class KegiatanSerializer(serializers.ModelSerializer):
     jenis_kegiatan_detail = JenisKegiatanSerializer(source='jenis_kegiatan', read_only=True)
     status_kegiatan_detail = StatusKegiatanSerializer(source='status_kegiatan', read_only=True)
     foto = FotoKegiatanSerializer(many=True, read_only=True)
     
     class Meta:
         model = Kegiatan
-        geo_field = 'lokasi'
         fields = [
             'id', 'nama', 'deskripsi', 'tanggal', 'jumlah_peserta',
             'lokasi', 'jenis_kegiatan', 'jenis_kegiatan_detail',
             'status_kegiatan', 'status_kegiatan_detail', 'foto',
             'created_at', 'updated_at'
         ]
+    
+    def to_representation(self, instance):
+        """Convert Point to GeoJSON format for output"""
+        data = super().to_representation(instance)
+        if instance.lokasi:
+            data['lokasi'] = {
+                'type': 'Point',
+                'coordinates': [instance.lokasi.x, instance.lokasi.y]  # [lng, lat]
+            }
+        return data
+    
+    def create(self, validated_data):
+        # Convert lokasi dict to GEOSGeometry if needed
+        if 'lokasi' in validated_data and isinstance(validated_data['lokasi'], dict):
+            validated_data['lokasi'] = GEOSGeometry(json.dumps(validated_data['lokasi']))
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        # Convert lokasi dict to GEOSGeometry if needed
+        if 'lokasi' in validated_data and isinstance(validated_data['lokasi'], dict):
+            validated_data['lokasi'] = GEOSGeometry(json.dumps(validated_data['lokasi']))
+        return super().update(instance, validated_data)
 
 
 class KegiatanListSerializer(serializers.ModelSerializer):
     jenis_kegiatan_detail = JenisKegiatanSerializer(source='jenis_kegiatan', read_only=True)
     status_kegiatan_detail = StatusKegiatanSerializer(source='status_kegiatan', read_only=True)
+    foto = FotoKegiatanSerializer(many=True, read_only=True)
     
     class Meta:
         model = Kegiatan
         fields = [
             'id', 'nama', 'deskripsi', 'tanggal', 'jumlah_peserta',
-            'jenis_kegiatan', 'jenis_kegiatan_detail',
-            'status_kegiatan', 'status_kegiatan_detail',
+            'lokasi', 'jenis_kegiatan', 'jenis_kegiatan_detail',
+            'status_kegiatan', 'status_kegiatan_detail', 'foto',
             'created_at', 'updated_at'
         ]
+    
+    def to_representation(self, instance):
+        """Convert Point to GeoJSON format for output"""
+        data = super().to_representation(instance)
+        if instance.lokasi:
+            data['lokasi'] = {
+                'type': 'Point',
+                'coordinates': [instance.lokasi.x, instance.lokasi.y]  # [lng, lat]
+            }
+        return data
 
 
 # Volunteer Serializers
