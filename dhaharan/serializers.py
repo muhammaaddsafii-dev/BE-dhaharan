@@ -166,6 +166,10 @@ class ResepSerializer(serializers.ModelSerializer):
 
 
 class ResepListSerializer(serializers.ModelSerializer):
+    bahan = BahanResepSerializer(many=True, read_only=True)
+    steps = StepsResepSerializer(many=True, read_only=True)
+    tips = TipsResepSerializer(many=True, read_only=True)
+    nutrisi = NutrisiResepSerializer(many=True, read_only=True)
     foto = FotoResepSerializer(many=True, read_only=True)
     
     class Meta:
@@ -173,7 +177,8 @@ class ResepListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'judul', 'deskripsi', 'kategori', 'tingkat_kesulitan',
             'waktu_memasak', 'waktu_persiapan', 'porsi', 'kalori',
-            'foto', 'created_at', 'updated_at'
+            'bahan', 'steps', 'tips', 'nutrisi', 'foto',
+            'created_at', 'updated_at'
         ]
 
 
