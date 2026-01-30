@@ -6,6 +6,8 @@ from .models import (
     Resep, BahanResep, StepsResep, TipsResep, NutrisiResep, FotoResep,
     TipeTransaksi, Transaksi, Pengurus
 )
+import openpyxl
+from django.http import HttpResponse
 from .serializers import (
     JenisKegiatanSerializer, StatusKegiatanSerializer,
     KegiatanSerializer, KegiatanListSerializer, FotoKegiatanSerializer,
@@ -316,6 +318,107 @@ class TransaksiViewSet(viewsets.ModelViewSet):
             'total_pengeluaran': total_pengeluaran,
             'saldo': total_pemasukan - total_pengeluaran
         })
+
+    @action(detail=False, methods=['get'])
+    def export_excel(self, request):
+        group_by = request.query_params.get('group_by', 'monthly')  # monthly, yearly
+        
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename=cashflow_report_{group_by}.xlsx'
+        
+        workbook = openpyxl.Workbook()
+        # Remove default sheet
+        default_sheet = workbook.active
+        workbook.remove(default_sheet)
+        
+        queryset = self.filter_queryset(self.get_queryset()).order_by('-tanggal')
+        
+        # Group data
+        grouped_data = {}
+        
+        # Helper for Indonesian month names
+        bulan_indo = {
+            1: 'Januari', 2: 'Februari', 3: 'Maret', 4: 'April', 5: 'Mei', 6: 'Juni',
+            7: 'Juli', 8: 'Agustus', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'Desember'
+        }
+        
+        for item in queryset:
+            date = item.tanggal
+            if group_by == 'yearly':
+                key = str(date.year)
+            else: # monthly
+                key = f"{bulan_indo[date.month]} {date.year}"
+            
+            if key not in grouped_data:
+                grouped_data[key] = []
+            grouped_data[key].append(item)
+            
+        # Create sheets
+        # Sort keys to have order (Newest first seems appropriate as per UI, but Excel usually left-to-right. 
+        # Let's do Newest first for relevance)
+        sorted_keys = sorted(grouped_data.keys(), key=lambda x: parse_group_key(x, group_by), reverse=True)
+
+        if not sorted_keys:
+             workbook.create_sheet("No Data")
+
+        for key in sorted_keys:
+            items = grouped_data[key]
+            # Sanitize sheet title (max 31 chars, no invalid chars)
+            safe_title = key[:31].replace(':', '').replace('\\', '').replace('/', '').replace('?', '').replace('*', '').replace('[', '').replace(']', '')
+            worksheet = workbook.create_sheet(title=safe_title)
+            
+            # Header
+            headers = ['No', 'Nama Transaksi', 'Deskripsi', 'Tipe', 'Jumlah', 'Tanggal']
+            for col_num, header in enumerate(headers, 1):
+                cell = worksheet.cell(row=1, column=col_num)
+                cell.value = header
+                cell.font = openpyxl.styles.Font(bold=True)
+                
+            # Data
+            for row_num, item in enumerate(items, 2):
+                worksheet.cell(row=row_num, column=1, value=row_num-1)
+                worksheet.cell(row=row_num, column=2, value=item.nama)
+                worksheet.cell(row=row_num, column=3, value=item.deskripsi)
+                worksheet.cell(row=row_num, column=4, value=item.tipe_transaksi.nama if item.tipe_transaksi else '-')
+                worksheet.cell(row=row_num, column=5, value=item.jumlah)
+                worksheet.cell(row=row_num, column=6, value=str(item.tanggal))
+
+            # Auto-adjust column width (simple approx)
+            for col in worksheet.columns:
+                 max_length = 0
+                 column = col[0].column_letter # Get the column name
+                 for cell in col:
+                     try:
+                         if len(str(cell.value)) > max_length:
+                             max_length = len(str(cell.value))
+                     except:
+                         pass
+                 adjusted_width = (max_length + 2)
+                 worksheet.column_dimensions[column].width = adjusted_width
+            
+        workbook.save(response)
+        return response
+
+def parse_group_key(key, group_by):
+    # Helper to sort keys correctly since they are strings
+    if group_by == 'yearly':
+        return int(key)
+    else:
+        # Parse "Januari 2024" back to date object for sorting
+        try:
+            parts = key.split(' ')
+            bulan_map = {
+                'Januari': 1, 'Februari': 2, 'Maret': 3, 'April': 4, 'Mei': 5, 'Juni': 6,
+                'Juli': 7, 'Agustus': 8, 'September': 9, 'Oktober': 10, 'November': 11, 'Desember': 12
+            }
+            month = bulan_map.get(parts[0], 1)
+            year = int(parts[1])
+            from datetime import date
+            return date(year, month, 1)
+        except:
+             return 0
 
 
 class PengurusViewSet(viewsets.ModelViewSet):
