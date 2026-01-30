@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from .models import (
     JenisKegiatan, StatusKegiatan, Kegiatan, FotoKegiatan, Volunteer,
     Resep, BahanResep, StepsResep, TipsResep, NutrisiResep, FotoResep,
-    TipeTransaksi, Transaksi, Pengurus, FotoPengurus
+    TipeTransaksi, Transaksi, Pengurus
 )
 from .serializers import (
     JenisKegiatanSerializer, StatusKegiatanSerializer,
@@ -13,7 +13,7 @@ from .serializers import (
     BahanResepSerializer, StepsResepSerializer, TipsResepSerializer,
     NutrisiResepSerializer, FotoResepSerializer,
     TipeTransaksiSerializer, TransaksiSerializer,
-    PengurusSerializer, FotoPengurusSerializer
+    PengurusSerializer
 )
 
 
@@ -323,6 +323,4 @@ class PengurusViewSet(viewsets.ModelViewSet):
     serializer_class = PengurusSerializer
 
 
-class FotoPengurusViewSet(viewsets.ModelViewSet):
-    queryset = FotoPengurus.objects.all()
-    serializer_class = FotoPengurusSerializer
+

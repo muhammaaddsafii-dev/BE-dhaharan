@@ -4,7 +4,7 @@ import json
 from .models import (
     JenisKegiatan, StatusKegiatan, Kegiatan, FotoKegiatan, Volunteer,
     Resep, BahanResep, StepsResep, TipsResep, NutrisiResep, FotoResep,
-    TipeTransaksi, Transaksi, Pengurus, FotoPengurus
+    TipeTransaksi, Transaksi, Pengurus
 )
 
 
@@ -202,20 +202,11 @@ class TransaksiSerializer(serializers.ModelSerializer):
         ]
 
 
-# Foto Pengurus Serializers
-class FotoPengurusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FotoPengurus
-        fields = '__all__'
-
-
 # Pengurus Serializers
 class PengurusSerializer(serializers.ModelSerializer):
-    foto = FotoPengurusSerializer(many=True, read_only=True)
-    
     class Meta:
         model = Pengurus
         fields = [
-            'id', 'nama', 'jabatan', 'foto',
+            'id', 'nama', 'jabatan', 'photo',
             'created_at', 'updated_at'
         ]

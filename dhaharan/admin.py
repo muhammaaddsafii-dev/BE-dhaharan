@@ -3,7 +3,7 @@ from django.contrib.gis.admin import GISModelAdmin
 from .models import (
     JenisKegiatan, StatusKegiatan, Kegiatan, FotoKegiatan, Volunteer,
     Resep, BahanResep, StepsResep, TipsResep, NutrisiResep, FotoResep,
-    TipeTransaksi, Transaksi, Pengurus, FotoPengurus
+    TipeTransaksi, Transaksi, Pengurus
 )
 
 
@@ -108,8 +108,4 @@ class PengurusAdmin(admin.ModelAdmin):
     search_fields = ['nama', 'jabatan']
 
 
-@admin.register(FotoPengurus)
-class FotoPengurusAdmin(admin.ModelAdmin):
-    list_display = ['id', 'pengurus', 'file_name', 'created_at']
-    list_filter = ['pengurus']
-    search_fields = ['file_name', 'pengurus__nama']
+

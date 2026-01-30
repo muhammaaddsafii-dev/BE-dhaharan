@@ -5,7 +5,7 @@ from .views import (
     FotoKegiatanViewSet, VolunteerViewSet, ResepViewSet,
     BahanResepViewSet, StepsResepViewSet, TipsResepViewSet,
     NutrisiResepViewSet, FotoResepViewSet, TipeTransaksiViewSet,
-    TransaksiViewSet, PengurusViewSet, FotoPengurusViewSet
+    TransaksiViewSet, PengurusViewSet
 )
 from .upload_views import upload_to_s3
 
@@ -24,7 +24,6 @@ router.register(r'foto-resep', FotoResepViewSet, basename='foto-resep')
 router.register(r'tipe-transaksi', TipeTransaksiViewSet, basename='tipe-transaksi')
 router.register(r'transaksi', TransaksiViewSet, basename='transaksi')
 router.register(r'pengurus', PengurusViewSet, basename='pengurus')
-router.register(r'foto-pengurus', FotoPengurusViewSet, basename='foto-pengurus')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -226,6 +226,7 @@ class Transaksi(models.Model):
 class Pengurus(models.Model):
     nama = models.CharField(max_length=200)
     jabatan = models.CharField(max_length=100)
+    photo = models.CharField(max_length=500, blank=True, null=True)  # URL from S3
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -236,22 +237,6 @@ class Pengurus(models.Model):
 
     def __str__(self):
         return f"{self.nama} - {self.jabatan}"
-
-
-class FotoPengurus(models.Model):
-    pengurus = models.ForeignKey(Pengurus, on_delete=models.CASCADE, related_name='foto')
-    file_path = models.ImageField(upload_to='pengurus/')
-    file_name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'foto_pengurus'
-        verbose_name = 'Foto Pengurus'
-        verbose_name_plural = 'Foto Pengurus'
-
-    def __str__(self):
-        return f"{self.pengurus.nama} - {self.file_name}"
 
 
 class FotoResep(models.Model):
