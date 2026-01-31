@@ -162,6 +162,3 @@ REST_FRAMEWORK = {
 if os.name == 'nt':  # Windows
     GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal312.dll"
     GEOS_LIBRARY_PATH = r"C:\OSGeo4W\bin\geos_c.dll"
-else:  # Linux/Docker
-    GDAL_LIBRARY_PATH = os.environ.get('GDAL_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/libgdal.so')
-    GEOS_LIBRARY_PATH = os.environ.get('GEOS_LIBRARY_PATH', '/usr/lib/x86_64-linux-gnu/libgeos_c.so')
