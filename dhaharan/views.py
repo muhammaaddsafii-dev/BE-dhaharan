@@ -422,7 +422,7 @@ def parse_group_key(key, group_by):
 
 
 class PengurusViewSet(viewsets.ModelViewSet):
-    queryset = Pengurus.objects.all()
+    queryset = Pengurus.objects.all().order_by('id')
     serializer_class = PengurusSerializer
 
 

@@ -8,6 +8,7 @@ from .views import (
     TransaksiViewSet, PengurusViewSet
 )
 from .upload_views import upload_to_s3
+from rest_framework.authtoken.views import obtain_auth_token
 
 router = DefaultRouter()
 router.register(r'jenis-kegiatan', JenisKegiatanViewSet, basename='jenis-kegiatan')
@@ -26,6 +27,7 @@ router.register(r'transaksi', TransaksiViewSet, basename='transaksi')
 router.register(r'pengurus', PengurusViewSet, basename='pengurus')
 
 urlpatterns = [
+    path('login/', obtain_auth_token, name='api_token_auth'),
     path('', include(router.urls)),
     path('upload/s3/', upload_to_s3, name='upload-s3'),
 ]
