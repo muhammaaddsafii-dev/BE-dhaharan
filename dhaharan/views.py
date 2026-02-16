@@ -152,6 +152,25 @@ class FotoKegiatanViewSet(viewsets.ModelViewSet):
     queryset = FotoKegiatan.objects.all()
     serializer_class = FotoKegiatanSerializer
     
+    def perform_create(self, serializer):
+        kegiatan = serializer.validated_data.get('kegiatan')
+        if kegiatan:
+            import re
+            # Sanitize kegiatan nama
+            # Replace spaces with underscore and remove non-alphanumeric chars
+            safe_nama = re.sub(r'[^a-zA-Z0-9]', '_', kegiatan.nama)
+            
+            # Get file from validated data
+            file_obj = serializer.validated_data.get('file_path')
+            if file_obj:
+                # Sanitize original filename
+                safe_filename = re.sub(r'[^a-zA-Z0-9.]', '_', file_obj.name)
+                # Set new name
+                file_obj.name = f"{safe_nama}_{safe_filename}"
+        
+        serializer.save()
+
+    
     def destroy(self, request, *args, **kwargs):
         """
         Override destroy to delete file from S3 before deleting from database

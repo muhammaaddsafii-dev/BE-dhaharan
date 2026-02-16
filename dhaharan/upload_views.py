@@ -63,19 +63,30 @@ def upload_to_s3(request):
         )
     
     try:
-        # Generate unique filename
-        ext = file.name.split('.')[-1]
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        unique_id = str(uuid.uuid4())[:8]
-        
         # Get folder from request, default to 'kegiatan'
         folder = request.POST.get('folder', 'kegiatan')
         # Validate folder to prevent directory traversal
         allowed_folders = ['kegiatan', 'resep', 'pengurus']
         if folder not in allowed_folders:
             folder = 'kegiatan'
+
+        # Check for title/prefix
+        title_prefix = request.POST.get('title', '')
         
-        filename = f"{folder}/{timestamp}_{unique_id}.{ext}"
+        if title_prefix:
+            import re
+            # Sanitize title
+            safe_title = re.sub(r'[^a-zA-Z0-9]', '_', title_prefix)
+            # Use safe_title as prefix to original filename
+            # Also sanitize original filename
+            safe_filename = re.sub(r'[^a-zA-Z0-9.]', '_', file.name)
+            filename = f"{folder}/{safe_title}_{safe_filename}"
+        else:
+            # Generate unique filename
+            ext = file.name.split('.')[-1]
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            unique_id = str(uuid.uuid4())[:8]
+            filename = f"{folder}/{timestamp}_{unique_id}.{ext}"
         
         # S3 configuration
         bucket_name = settings.AWS_STORAGE_BUCKET_NAME
