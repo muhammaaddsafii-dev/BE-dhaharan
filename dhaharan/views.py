@@ -32,28 +32,43 @@ class StatusKegiatanViewSet(viewsets.ModelViewSet):
 class KegiatanViewSet(viewsets.ModelViewSet):
     queryset = Kegiatan.objects.all()
 
+    def _auto_complete_past_kegiatan(self):
+        """
+        Helper: update status kegiatan menjadi 'Selesai' (id=3)
+        untuk kegiatan yang tanggalnya sudah lewat (timezone Jakarta UTC+7).
+        """
+        from django.utils import timezone
+        from datetime import timedelta, timezone as dt_timezone
+
+        tz_jakarta = dt_timezone(timedelta(hours=7))
+        current_date = timezone.now().astimezone(tz_jakarta).date()
+
+        updated_count = Kegiatan.objects.filter(
+            tanggal__lt=current_date
+        ).exclude(
+            status_kegiatan_id=3
+        ).update(status_kegiatan_id=3)
+
+        return updated_count, current_date
+
+    def list(self, request, *args, **kwargs):
+        """
+        Override list untuk otomatis update status kegiatan yang sudah lewat
+        setiap kali data kegiatan di-fetch.
+        """
+        try:
+            self._auto_complete_past_kegiatan()
+        except Exception as e:
+            print(f"Error auto-completing kegiatan: {e}")
+        return super().list(request, *args, **kwargs)
+
     @action(detail=False, methods=['post'])
     def auto_complete(self, request):
         """
-        Auto-update status kegiatan menjadi 'Selesai' (id=3)
-        untuk kegiatan yang tanggalnya sudah lewat (timezone Jakarta UTC+7).
-        Dipanggil dari frontend saat halaman Activities dibuka.
+        Endpoint manual untuk auto-update status kegiatan.
         """
         try:
-            from django.utils import timezone
-            from datetime import timedelta, timezone as dt_timezone
-
-            # Timezone Jakarta (UTC+7)
-            tz_jakarta = dt_timezone(timedelta(hours=7))
-            current_date = timezone.now().astimezone(tz_jakarta).date()
-
-            # Update kegiatan yang tanggalnya sudah lewat dan belum berstatus Selesai (id=3)
-            updated_count = Kegiatan.objects.filter(
-                tanggal__lt=current_date
-            ).exclude(
-                status_kegiatan_id=3
-            ).update(status_kegiatan_id=3)
-
+            updated_count, current_date = self._auto_complete_past_kegiatan()
             return Response({
                 'message': f'{updated_count} kegiatan berhasil diupdate ke status Selesai',
                 'updated_count': updated_count,
